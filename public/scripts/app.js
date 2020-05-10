@@ -1,52 +1,46 @@
-class IndecisionApp extends React.Component {
+class Counter extends React.Component {
     constructor(props) {
         super(props);
-        this.handleDeleteOptions = this.handleDeleteOptions.bind(this);
-        this.handleMakeDecision = this.handleMakeDecision.bind(this);
-        this.handleAddOption = this.handleAddOption.bind(this);
+        this.handleAddOne = this.handleAddOne.bind(this);
+        this.handleMinusOne = this.handleMinusOne.bind(this);
+        this.handleReset = this.handleReset.bind(this);
         this.state = {
-            options: []
+            count: 0
         };
     }
-    handleMakeDecision() {
-        const randomNum = Math.floor(Math.random() * this.state.options.length);
-        const option = this.state.options[randomNum];
-        alert(option);
-    }
-    handleAddOption(option) {
-        if (!option) {
-            return 'Please enter a valid value';
-        } else if (this.state.options.indexOf(option) > -1) {
-            return 'Option already exists';
+    componentDidMount() {
+        const num = localStorage.getItem('count');
+        const intNum = parseInt(num, 10);
+        if (!isNaN(intNum)) {
+            this.setState(() => ({ count: intNum }));
         }
+    }
+    componentDidUpdate(prevProps, prevState) {
+        if (prevState.count !== this.state.count) {
+            localStorage.setItem('count', this.state.count);
+        }
+    }
+    handleAddOne() {
         this.setState(prevState => {
             return {
-                options: prevState.options.concat([option])
+                count: prevState.count + 1
             };
         });
     }
-    handleDeleteOptions() {
+    handleMinusOne() {
+        this.setState(prevState => {
+            return {
+                count: prevState.count - 1
+            };
+        });
+    }
+    handleReset() {
         this.setState(() => {
             return {
-                options: []
+                count: 0
             };
         });
     }
-    render() {
-        const title = 'Indecision';
-        const subtitle = 'Put your life in hands of a computer.';
-        return React.createElement(
-            'div',
-            null,
-            React.createElement(Header, { title: title, subtitle: subtitle }),
-            React.createElement(Action, { handleMakeDecision: this.handleMakeDecision, hasOptions: this.state.options.length > 0 }),
-            React.createElement(Options, { options: this.state.options, handleDeleteOptions: this.handleDeleteOptions }),
-            React.createElement(AddOption, { handleAddOption: this.handleAddOption })
-        );
-    }
-}
-
-class Header extends React.Component {
     render() {
         return React.createElement(
             'div',
@@ -54,105 +48,26 @@ class Header extends React.Component {
             React.createElement(
                 'h1',
                 null,
-                this.props.title
+                'Counter: ',
+                this.state.count
             ),
-            React.createElement(
-                'h2',
-                null,
-                this.props.subtitle
-            )
-        );
-    }
-};
-
-class Action extends React.Component {
-    render() {
-        return React.createElement(
-            'div',
-            null,
             React.createElement(
                 'button',
-                { disabled: !this.props.hasOptions, onClick: this.props.handleMakeDecision },
-                'What should I do?'
-            )
-        );
-    }
-}
-
-class Options extends React.Component {
-    render() {
-        return React.createElement(
-            'div',
-            null,
-            'Options Component comes here.',
-            React.createElement(
-                'p',
-                null,
-                this.props.options.length
+                { onClick: this.handleAddOne },
+                '+1'
             ),
-            this.props.options.length > 0 && this.props.options.map(option => React.createElement(Option, { key: option, option: option })),
             React.createElement(
                 'button',
-                { onClick: this.props.handleDeleteOptions },
-                'Remove All'
+                { onClick: this.handleMinusOne },
+                '-1'
             ),
-            React.createElement(Option, null)
-        );
-    }
-}
-
-class Option extends React.Component {
-    render() {
-        return React.createElement(
-            'div',
-            null,
             React.createElement(
-                'p',
-                null,
-                this.props.option
+                'button',
+                { onClick: this.handleReset },
+                'reset'
             )
         );
     }
 }
 
-class AddOption extends React.Component {
-    constructor(props) {
-        super(props);
-        this.handleAddOption = this.handleAddOption.bind(this);
-        this.state = {
-            error: undefined
-        };
-    }
-    handleAddOption(e) {
-        e.preventDefault();
-        const option = e.target.elements.option.value.trim();
-        const error = this.props.handleAddOption(option);
-        this.setState(() => {
-            return { error };
-        });
-        e.target.elements.option.value = '';
-    }
-    render() {
-        return React.createElement(
-            'div',
-            null,
-            this.state.error && React.createElement(
-                'p',
-                null,
-                this.state.error
-            ),
-            React.createElement(
-                'form',
-                { onSubmit: this.handleAddOption },
-                React.createElement('input', { type: 'text', name: 'option' }),
-                React.createElement(
-                    'button',
-                    { className: 'button' },
-                    'Add Option'
-                )
-            )
-        );
-    }
-}
-
-ReactDOM.render(React.createElement(IndecisionApp, null), document.getElementById('app'));
+ReactDOM.render(React.createElement(Counter, null), document.getElementById('app'));
